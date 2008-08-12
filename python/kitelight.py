@@ -19,9 +19,8 @@ class kitelight:
 
     def setSpeed(self, index, speed):
         command = ''.join([chr(index), chr(speed), chr(0)])
-        
         self.m_serialPort.write(command)
-        return
+        time.sleep(.1)
     
     def resetCommunication(self):
         self.setSpeed(0xff, 0xff);
@@ -30,16 +29,21 @@ class kitelight:
 def main(argv=None):
     if argv is None:
         argv = sys.argv
+#    s.resetCommunication()
+#    for i in range(0, 255):
+#        s.setSpeed(4, i)
+#        time.sleep(.10)
+#    s.resetCommunication()
 
+    s = kitelight('/dev/tty.usbserial-A6004oBL')
+    s.connect()
+    s.setSpeed(3, 0)
+    s.setSpeed(4, 255)
+    time.sleep(1)
+    s.disconnect()
     return 0
 
 if __name__ == "__main__":
-    s = kitelight('/dev/tty.usbserial-000052FD')
-    s.connect()
-    for i in range(0, 255):
-        s.setSpeed(4, i)
-        time.sleep(.010)
-    s.resetCommunication()
     sys.exit(main())
 
 
