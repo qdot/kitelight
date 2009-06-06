@@ -1,9 +1,9 @@
 import time
 import sys
 import serial
+from eventlet import api
 
 class kitelight:
-
     m_serialPort = ""
     
     def __init__(self, serial_port):
@@ -20,11 +20,21 @@ class kitelight:
     def setSpeed(self, index, speed):
         command = ''.join([chr(index), chr(speed), chr(0)])
         self.m_serialPort.write(command)
-        time.sleep(.1)
-    
+        time.sleep(.001)
     def resetCommunication(self):
         self.setSpeed(0xff, 0xff);
         return 
+
+s = kitelight('/dev/tty.usbserial-A70062Nn')
+
+def handle_socket(reader, writer):
+    while True:
+        print "connect!"
+        # pass through every non-eof line
+        x = reader.readline()
+        if not x: break
+        print x
+        s.setSpeed(int(x.split(' ')[0]), int(x.split(' ')[1]))
 
 def main(argv=None):
     if argv is None:
@@ -35,11 +45,16 @@ def main(argv=None):
 #        time.sleep(.10)
 #    s.resetCommunication()
 
-    s = kitelight('/dev/tty.usbserial-A6004oBL')
     s.connect()
-    s.setSpeed(3, 0)
-    s.setSpeed(4, 255)
-    time.sleep(1)
+    time.sleep(3)
+    server = api.tcp_listener(('192.168.123.20', 9000))
+    while True:
+        try:
+            new_sock, address = server.accept()
+        except KeyboardInterrupt:
+            break
+        # handle every new connection with a new coroutine
+        api.spawn(handle_socket, new_sock.makefile('r'), new_sock.makefile('w'))
     s.disconnect()
     return 0
 
