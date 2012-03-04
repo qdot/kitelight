@@ -4,7 +4,7 @@ import sys
 
 def main(argv=None):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    sock.connect( ('192.168.123.20', 9000) )
+    sock.connect( ('localhost', 9000) )
 #    for i in range(0, 255):
     sock.send(sys.argv[1] + " " + sys.argv[2] + "\n")
     #    sock.send("%s %s \r\n" % (sys.argv[1], str(i)))
